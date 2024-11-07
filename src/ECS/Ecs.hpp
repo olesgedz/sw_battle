@@ -7,6 +7,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
+#include <cstdint>
 #include <algorithm>
 #include <deque>
 

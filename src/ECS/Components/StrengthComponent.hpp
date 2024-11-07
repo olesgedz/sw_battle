@@ -1,10 +1,10 @@
 #pragma once
 
 struct StrengthComponent {
-	int strength;
+	uint32_t strength;
 
 
-	explicit StrengthComponent(int  strength = 0) :
+	explicit StrengthComponent(uint32_t  strength = 0) :
 	  strength(strength) {
 	}
 };

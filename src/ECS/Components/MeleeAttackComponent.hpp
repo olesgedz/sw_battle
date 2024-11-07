@@ -1,10 +1,12 @@
 #pragma once
 
+#include <cstdint>
+
 struct MeleeAttackComponent {
-	int healthPoints;
+	uint32_t healthPoints;
 
 
-	explicit MeleeAttackComponent(int  healthPoints = 0) :
+	explicit MeleeAttackComponent(uint32_t  healthPoints = 0) :
 	  healthPoints(healthPoints) {
 	}
 };

@@ -1,33 +1,31 @@
 #pragma once
 
-#include <algorithm>
-
+#include "ECS/Components/AIComponent.hpp"
+#include "ECS/Components/HealthComponent.hpp"
+#include "ECS/Components/PositionComponent.hpp"
+#include "ECS/Components/UnitComponent.hpp"
 #include "ECS/Ecs.hpp"
 #include "ECS/Events.hpp"
-#include "ECS/Components/AIComponent.hpp"
+#include "IO/System/EventLog.hpp"
+#include "Simulation/Map.hpp"
 
-class AISystem : public System {
+#include <algorithm>
+
+class AISystem : public System
+{
 public:
-  AISystem() {
-    requireComponent<AIComponent>();
-  }
-
-  void subscribeToEvents(std::unique_ptr<EventBus>& eventBus) {
-  }
-	
-  void update() {
-    auto entities = getSystemEntities();
-
-    std::ranges::sort(entities, [](Entity& a, Entity& b) {
-  return a.getComponent<UnitComponent>().spawnOrder < b.getComponent<UnitComponent>().spawnOrder;
-});
-
-    for (auto& entity : entities) {
-	  auto& aiComponent = entity.getComponent<AIComponent>();
-      auto entityOrder = entity.getComponent<UnitComponent>().spawnOrder;
-      std::cout << "AI System: id " << entity.getId()  << "   spawn order entityOrder: " << entityOrder << std::endl;
-	  // Do AI stuff
+	AISystem() {
+		requireComponent<AIComponent>();
+		requireComponent<PositionComponent>();
+		requireComponent<HealthComponent>();
+		requireComponent<UnitComponent>();
 	}
-		
-  }
+	
+	void update(std::shared_ptr<Map> map);
+	void meleeBehavior(Entity& entity, std::shared_ptr<Map> map);
+	void rangeBehavior(Entity& entity, std::shared_ptr<Map> map);
+	bool areInRange( Entity& entity,  Entity& other, int range);
+	
+private:
+	sw::EventLog eventLog;
 };

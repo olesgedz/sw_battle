@@ -48,37 +48,33 @@ int main(int argc, char** argv)
 	parser.add<io::CreateMap>(
 		[&simulation](auto command)
 		{
-			printDebug(std::cout, command);
 			simulation.createMap(command.width, command.height);
 		});
 	parser.add<io::SpawnSwordsman>(
 		[&simulation](auto command)
 		{
-			printDebug(std::cout, command);
 			simulation.addWarrior(command.unitId, command.x, command.y,  command.hp, command.strength);
 		});
 	parser.add<io::SpawnHunter>(
 		[&simulation](auto command)
 		{
-			printDebug(std::cout, command);
 			simulation.addArcher(command.unitId, command.x, command.y, command.hp, command.agility, command.strength, command.range);
 		});
 	parser.add<io::March>(
 		[&simulation](auto command)
 		{
-			printDebug(std::cout, command);
 			simulation.addMatchCommand(command.unitId, command.targetX, command.targetY);
 		});
-
+	
 	parser.parse(file);
-
+	
 	simulation.run();
 	
 	//
-	// std::cout << "\n\nEvents:\n";
-	//
-	// EventLog eventLog;
-	//
+	std::cout << "\n\nEvents:\n";
+	
+	EventLog eventLog;
+	
 	// eventLog.log(1, io::MapCreated{10, 10});
 	// eventLog.log(1, io::UnitSpawned{1, "Swordsman", 0, 0});
 	// eventLog.log(1, io::UnitSpawned{2, "Hunter", 9, 0});

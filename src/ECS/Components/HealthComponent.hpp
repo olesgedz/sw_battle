@@ -1,10 +1,12 @@
 #pragma once
 
+#include <cstdint>
+
 struct HealthComponent {
-	int healthPoints;
+	uint32_t healthPoints;
 
 
-	explicit HealthComponent(int  healthPoints = 0) :
+	explicit HealthComponent(uint32_t  healthPoints = 0) :
 	  healthPoints(healthPoints) {
 	}
 };

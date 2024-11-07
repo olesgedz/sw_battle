@@ -4,6 +4,8 @@
 #include "ECS/Events.hpp"
 #include "ECS/Systems/AttackSystem.hpp"
 #include "IO/System/CommandParser.hpp"
+#include "IO/System/EventLog.hpp"
+#include "Simulation/Map.hpp"
 
 #include <array>
 
@@ -15,11 +17,12 @@ class Simulation {
 		void run();
 		void stop();
 	void createMap(int width, int height);
+	void  _updateMap();
 
-	void addWarrior(int gameId, int xPos, int yPos, int hp, int strength);
-	void addArcher(int gameId, int xPos, int yPos, int hp, int agility, int strength, int range);
-	void addMatchCommand(int gameId, int targetX, int targetY);
-	
+	void addWarrior(uint32_t gameId, uint32_t xPos, uint32_t yPos, uint32_t hp, uint32_t strength);
+	void addArcher(uint32_t gameId, uint32_t xPos, uint32_t yPos, uint32_t hp, uint32_t agility, uint32_t strength, uint32_t range);
+	void addMatchCommand(uint32_t gameId, uint32_t targetX, uint32_t targetY);
+	static size_t getTurnNumber()  { return turnNumber; }
 
 	private:
 	void _update();
@@ -28,21 +31,13 @@ class Simulation {
 	// GameID, Entity
 	std::unordered_map<int, std::shared_ptr<Entity>> units;
 	
-	size_t turnNumber = 0;
+	static size_t turnNumber;
 	std::shared_ptr<EventBus> _eventBus;
 	std::shared_ptr<Registry> _registry;
+	
+	std::shared_ptr<Map> _map;
 
-	struct Map
-	{
-		std::vector<char> data;
-		int width;
-		int height;
-	};
-	Map _map;
+	sw::EventLog eventLog;
 	
 	int spawnOrder = 0;
-
-	void  printMap() const;
-
-
 };

@@ -1,10 +1,10 @@
 #pragma once
-
+#include <cstdint>
 struct AgilityComponent {
-	int agility;
+	uint32_t agility;
 
 
-	explicit AgilityComponent(int  agility = 0) :
+	explicit AgilityComponent(uint32_t  agility = 0) :
 	  agility(agility) {
 	}
 };
