@@ -12,8 +12,7 @@ class Simulation {
 	public:
 		Simulation() = default;
 		void init();
-		void setup(sw::io::CommandParser& parser, std::ifstream& file);
-		void update();
+		void run();
 		void stop();
 	void createMap(int width, int height);
 
@@ -23,9 +22,11 @@ class Simulation {
 	
 
 	private:
+	void _update();
 
+	bool isRunning = false; 
 	// GameID, Entity
-	std::unordered_map<int, Entity> units;
+	std::unordered_map<int, std::shared_ptr<Entity>> units;
 	
 	size_t turnNumber = 0;
 	std::shared_ptr<EventBus> _eventBus;

@@ -40,14 +40,11 @@ int main(int argc, char** argv)
 	// // Code for example...
 	Simulation simulation;
 	simulation.init();
-	// io::CommandParser parser;
-	//
-	// simulation.setup(parser, file);
-	//
-	// return 0;
 
 	std::cout << "Commands:\n";
+
 	io::CommandParser parser;
+	
 	parser.add<io::CreateMap>(
 		[&simulation](auto command)
 		{
@@ -74,6 +71,9 @@ int main(int argc, char** argv)
 		});
 
 	parser.parse(file);
+
+	simulation.run();
+	
 	//
 	// std::cout << "\n\nEvents:\n";
 	//

@@ -1,9 +1,10 @@
 #pragma once
 
 struct MovementTargetComponent {
-	int x;
-	int y;
+	int range;
 
-	explicit MovementTargetComponent(int x, int y) : x (x), y (y) {
+
+	explicit MovementTargetComponent(int  range = 0, int x = 0) :
+	  range(range) {
 	}
 };

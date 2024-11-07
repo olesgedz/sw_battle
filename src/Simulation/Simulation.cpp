@@ -8,7 +8,7 @@
 #include "ECS/Components/RangeAttackComponent.hpp"
 #include "ECS/Components/MovementTargetComponent.hpp"
 #include "ECS/Systems/AISystem.hpp"
-#include "ECS/Systems/MoveSystem.hpp"
+#include "ECS/Systems/MovementSystem.hpp"
 #include "IO/Commands/CreateMap.hpp"
 #include "IO/Commands/SpawnSwordsman.hpp"
 
@@ -18,33 +18,38 @@ void Simulation::init() {
 	_eventBus =  std::make_unique<EventBus>();
 	_registry = std::make_unique<Registry>();
 
-
-}
-
-void Simulation::setup(sw::io::CommandParser& parser, std::ifstream& file) {
-	// Add Systems
 	_registry->addSystem<AISystem>();
-	_registry->addSystem<AttackSystem>();
-
-	// std::cout << "Commands:\n";
-	// int mapWith = 0;
-	// int mapHeight = 0;
-	//
-	// printMap();
-	//
-	// parser.parse(file);
-	// createMap(10, 10);
+	isRunning = true;
 
 }
 
-void  Simulation::update() {
+
+void  Simulation::_update() {
+	_eventBus->reset();
+
+	// Subscribe to events
+
+
+	
 	_registry->update();
 
-	_registry->getSystem<AttackSystem>().update();
+
+	// System updates
+
+	_registry->getSystem<AISystem>().update();
+	// _registry->getSystem<AttackSystem>().update();
 }
+
+
 
 void  Simulation::stop() {
 
+}
+
+void  Simulation::run() {
+	while (isRunning) {
+		_update();
+	}
 }
 
 void  Simulation::createMap(int width, int height)
@@ -71,37 +76,38 @@ void  Simulation::printMap() const
 
 void Simulation::addArcher(int gameId, int xPos, int yPos, int hp, int agility, int strength, int range)
 {
-	std::cout << " addArcher AAAA" << range << std::endl;
-	Entity archer = _registry->createEntity();
-	archer.addComponent<UnitComponent>(gameId, spawnOrder++);
-	archer.addComponent<PositionComponent>(xPos, yPos);
-	archer.addComponent<HealthComponent>(hp);
-	archer.addComponent<AgilityComponent>(agility);
-	archer.addComponent<StrengthComponent>(strength);
-	// archer.addComponent<RangeAttackComponent>(range);
+	auto archer = std::make_shared<Entity>(_registry->createEntity());
+	archer->addComponent<UnitComponent>(gameId, spawnOrder++);
+	archer->addComponent<PositionComponent>(xPos, yPos);
+	archer->addComponent<HealthComponent>(hp);
+	archer->addComponent<AgilityComponent>(agility);
+	archer->addComponent<StrengthComponent>(strength);
+	archer->addComponent<RangeAttackComponent>(range);
+	archer->addComponent<AIComponent>();
 	units.insert({gameId, archer});
 	
 	std::cout << "Archer added" << std::endl;
 }
 void Simulation::addWarrior(int gameId, int xPos, int yPos, int hp, int strength)
 {
-	std::cout << " AAAA" << gameId << std::endl;
-	Entity warrior = _registry->createEntity();
-	warrior.addComponent<UnitComponent>(gameId, spawnOrder++);
-	warrior.addComponent<PositionComponent>(xPos, yPos);
-	warrior.addComponent<HealthComponent>(hp);
-	warrior.addComponent<StrengthComponent>(strength);
+	auto warrior = std::make_shared<Entity>(_registry->createEntity());
+	warrior->addComponent<UnitComponent>(gameId, spawnOrder++);
+	warrior->addComponent<PositionComponent>(xPos, yPos);
+	warrior->addComponent<HealthComponent>(hp);
+	warrior->addComponent<StrengthComponent>(strength);
+	warrior->addComponent<AIComponent>();
 	units.insert({gameId, warrior});
 	
 	std::cout << "Warrior added" << std::endl;
 }
+
 void Simulation::addMatchCommand(int gameId, int targetX, int targetY)
 {
-	// if (units.contains(gameId))
-	// {
-	// 	// units[gameId].addComponent<MovementTargetComponent>(targetX, targetX);
-	// } else
-	// {
-	// 	throw std::runtime_error("Unit with gameId " + std::to_string(gameId) + " not found");
-	// }
+	if (units.contains(gameId))
+	{
+		units.at(gameId)->addComponent<MovementTargetComponent>(targetX, targetY);
+	} else
+	{
+		throw std::runtime_error("Unit with gameId " + std::to_string(gameId) + " not found");
+	}
 }

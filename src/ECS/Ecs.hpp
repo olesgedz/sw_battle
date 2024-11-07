@@ -135,8 +135,7 @@ public:
   Entity createEntity();
 
   void killEntity(Entity entity);
-
-
+	
   // Component Management
   template <typename T, typename... TArgs>
   void addComponent(Entity entity, TArgs&&... args);
