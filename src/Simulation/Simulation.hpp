@@ -15,12 +15,18 @@ class Simulation {
 		void setup(sw::io::CommandParser& parser, std::ifstream& file);
 		void update();
 		void stop();
-	void createMap(int x, int y)
-	{
-		std::cout << "MAP SIZE" << x << " " << y  << std::endl;
-	}
-		
+	void createMap(int width, int height);
+
+	void addWarrior(int gameId, int xPos, int yPos, int hp, int strength);
+	void addArcher(int gameId, int xPos, int yPos, int hp, int agility, int strength, int range);
+	void addMatchCommand(int gameId, int targetX, int targetY);
+	
+
 	private:
+
+	// GameID, Entity
+	std::unordered_map<int, Entity> units;
+	
 	size_t turnNumber = 0;
 	std::shared_ptr<EventBus> _eventBus;
 	std::shared_ptr<Registry> _registry;
@@ -33,8 +39,9 @@ class Simulation {
 	};
 	Map _map;
 	
-	void _initMap(int width, int height);
+	int spawnOrder = 0;
 
-	void  printMap();
+	void  printMap() const;
+
 
 };
