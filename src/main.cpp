@@ -12,126 +12,17 @@
 #include <IO/System/CommandParser.hpp>
 #include <IO/System/EventLog.hpp>
 #include <IO/System/PrintDebug.hpp>
+#include <Simulation/Simulation.hpp>
+
 #include <fstream>
 #include <iostream>
 
 
-
-class BaseWarrior
-{
-public:
-	virtual ~BaseWarrior() = default;
-	virtual void Think() = 0;
-};
-
-
-class IMove
-{
-	virtual void Move() = 0; 
-};
-
-class IAttack
-{
-	virtual void Attack() = 0;
-};
-
-class SwordWarrior : public  BaseWarrior, IAttack, IMove
-{
-public:
-    int x = 0;
-	int y = 0;
-
-	SwordWarrior(int x, int y) : x(x), y(y) {};
-
-	
-	void Think() override
-	{
-		std::cout << "Swordman Think" << std::endl;
-		std::cout << "Position " << x << " " << y << std::endl;
-		if (x > 3)
-		{
-			Attack();
-		} else
-		{
-			Move();
-		}
-		
-
-	}
-
-	void Move() override
-	{
-		std::cout << "Swordman moved" << std::endl;
-		x-=1;
-		y -= 2;
-		std::cout << "Swordman moved to " << x << " " << y << std::endl;
-
-	}
-	
-	void Attack() override
-	{
-		std::cout << " Swordman Attack" << std::endl;
-	}
-	
-};
-
-class ArcherWarrior : public BaseWarrior, IAttack, IMove
-{
-public:
-
-	int x = 0;
-	int y = 0;
-
-	ArcherWarrior(int x, int y) : x(x), y(y) {};
-	
-	void Think() override
-	{
-		std::cout << "ArcherWarrior Think" << std::endl;
-		std::cout << "Position " << x << " " << y << std::endl;
-
-		if (x > 5)
-		{
-			Attack();
-		} else
-		{
-			Move();
-		}
-		
-	}
-	
-	void Move() override
-	{
-		std::cout << "ArcherWarrior moved" << std::endl;
-		x += 2;
-		std::cout << "ArcherWarrior moved to " << x << " " << y << std::endl;
-
-	}
-	
-
-	void Attack() override
-	{
-		std::cout << "Attack in Range" << std::endl;
-	}
-};
-
 int main(int argc, char** argv)
 {
-	std::vector<std::shared_ptr<BaseWarrior>> gameObjects;
-	
-	gameObjects.emplace_back(std::make_shared<ArcherWarrior>(-10, 0));
-	gameObjects.emplace_back(std::make_shared<SwordWarrior>(5, -10));
-
-for (int i = 0; i < 20; i++)
-{
-	for (auto& character : gameObjects)
-	{
-		character->Think();
-	}
+	Simulation simulation;
+	simulation.init();
 }
-
-	
-}
-
 
 
 // int main(int argc, char** argv)
