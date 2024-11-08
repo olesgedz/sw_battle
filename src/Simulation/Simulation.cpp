@@ -2,13 +2,13 @@
 
 #include "ECS/Components/AgilityComponent.hpp"
 #include "ECS/Components/HealthComponent.hpp"
+#include "ECS/Components/MeleeAttackComponent.hpp"
 #include "ECS/Components/MovementTargetComponent.hpp"
 #include "ECS/Components/PositionComponent.hpp"
 #include "ECS/Components/RangeAttackComponent.hpp"
 #include "ECS/Components/StrengthComponent.hpp"
 #include "ECS/Components/UnitComponent.hpp"
 #include "ECS/Systems/AISystem.hpp"
-#include "ECS/Systems/MovementSystem.hpp"
 #include "IO/Commands/CreateMap.hpp"
 #include "IO/Commands/SpawnSwordsman.hpp"
 #include "IO/Events/MapCreated.hpp"
@@ -39,8 +39,7 @@ void Simulation::_update()
 
 	// System updates
 
-	_registry->getSystem<AISystem>().update(_map);
-	// _registry->getSystem<AttackSystem>().update();
+	_registry->getSystem<AISystem>().update(_map, isRunning);
 }
 
 void Simulation::stop() {}
@@ -59,7 +58,8 @@ void Simulation::run()
 {
 	_updateMap();
 	while (isRunning)
-	{	turnNumber++;
+	{
+		turnNumber++;
 		_update();
 	}
 }

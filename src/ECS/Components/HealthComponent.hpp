@@ -2,11 +2,11 @@
 
 #include <cstdint>
 
-struct HealthComponent {
+struct HealthComponent
+{
 	uint32_t healthPoints;
 
-
-	explicit HealthComponent(uint32_t  healthPoints = 0) :
-	  healthPoints(healthPoints) {
-	}
+	explicit HealthComponent(uint32_t healthPoints = 0) :
+			healthPoints(healthPoints)
+	{}
 };

@@ -15,7 +15,7 @@
 #include "IO/Events/UnitMoved.hpp"
 #include "Simulation/Simulation.hpp"
 
-void AISystem::update(std::shared_ptr<Map> map)
+void AISystem::update(std::shared_ptr<Map> map, bool& isRunning)
 {
 	auto entities = getSystemEntities();
 
@@ -30,7 +30,7 @@ void AISystem::update(std::shared_ptr<Map> map)
 		{
 			continue;
 		}
-		
+
 		if (entity.hasComponent<RangeAttackComponent>())
 		{
 			rangeBehavior(entity, map);
@@ -40,32 +40,49 @@ void AISystem::update(std::shared_ptr<Map> map)
 			meleeBehavior(entity, map);
 		}
 	}
+
+	if (checkIfFinish())
+	{
+		isRunning = false;
+	}
 }
 
+bool AISystem::checkIfFinish()
+{
+	int aliveCount = 0;
+	for (auto& entity : getSystemEntities())
+	{
+		if (entity.getComponent<AIComponent>().alive)
+		{
+			aliveCount++;
+		}
+	}
+	return aliveCount < 2;
+}
 
 void AISystem::meleeBehavior(Entity& entity, std::shared_ptr<Map> map)
 {
-	bool canAttack = false;
-	for (auto& otherEntity: getSystemEntities())
+	bool FinishedTurn = false;
+	for (auto& otherEntity : getSystemEntities())
 	{
 		if (otherEntity == entity)
 		{
 			continue;
 		}
 
-		if (areInRange( entity,  otherEntity, 1))
+		if (areInRange(entity, otherEntity, 1))
 		{
-			canAttack = true;
-			
+			FinishedTurn = true;
+
 			auto& health = otherEntity.getComponent<HealthComponent>();
 			health.healthPoints -= entity.getComponent<StrengthComponent>().strength;
 
-	
 			uint32_t attackerUnitId = entity.getComponent<UnitComponent>().gameId;
 			uint32_t targetUnitId = otherEntity.getComponent<UnitComponent>().gameId;
 			uint32_t damage = entity.getComponent<StrengthComponent>().strength;
 			uint32_t targetHp = health.healthPoints;
-			eventLog.log(Simulation::getTurnNumber(), sw::io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetHp});
+			eventLog.log(
+				Simulation::getTurnNumber(), sw::io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetHp});
 			if (targetHp <= 0)
 			{
 				otherEntity.getComponent<AIComponent>().alive = false;
@@ -75,54 +92,39 @@ void AISystem::meleeBehavior(Entity& entity, std::shared_ptr<Map> map)
 		}
 	}
 
-	if (!canAttack)
+	if (!FinishedTurn)
 	{
 		if (entity.hasComponent<MovementTargetComponent>())
 		{
-			auto& position = entity.getComponent<PositionComponent>();
-			const auto target = entity.getComponent<MovementTargetComponent>();
-			unsigned int id = entity.getComponent<UnitComponent>().gameId;
-			int targetDirectionX = target.x - position.x;
-			int targetDirectionY = target.y - position.y;
-
-			normalize(targetDirectionX, targetDirectionY);
-			if (targetDirectionX != 0 || targetDirectionY != 0)
-			{
-				position.x += targetDirectionX;
-				position.y += targetDirectionY;
-
-				unsigned int posX = position.x;
-				unsigned int posY = position.y;
-				eventLog.log(Simulation::getTurnNumber(), sw::io::UnitMoved{id, posX, posY});
-			}
+			moveBehavior(entity, map);
 		}
 	}
 }
 
 void AISystem::rangeBehavior(Entity& entity, std::shared_ptr<Map> map)
 {
-	bool canAttack = false;
-	for (auto& otherEntity: getSystemEntities())
+	bool finishedTurn = false;
+	for (auto& otherEntity : getSystemEntities())
 	{
 		if (otherEntity == entity)
 		{
 			continue;
 		}
 
-		if (areInRange( entity,  otherEntity, 1))
+		if (areInRange(entity, otherEntity, 0))
 		{
-			canAttack = true;
-			
+			finishedTurn = true;
+
 			auto& health = otherEntity.getComponent<HealthComponent>();
 			health.healthPoints -= entity.getComponent<StrengthComponent>().strength;
 
-	
 			uint32_t attackerUnitId = entity.getComponent<UnitComponent>().gameId;
 			uint32_t targetUnitId = otherEntity.getComponent<UnitComponent>().gameId;
 			uint32_t damage = entity.getComponent<StrengthComponent>().strength;
 			uint32_t targetHp = health.healthPoints;
 
-			eventLog.log(Simulation::getTurnNumber(), sw::io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetHp});
+			eventLog.log(
+				Simulation::getTurnNumber(), sw::io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetHp});
 
 			if (targetHp <= 0)
 			{
@@ -133,29 +135,29 @@ void AISystem::rangeBehavior(Entity& entity, std::shared_ptr<Map> map)
 		}
 	}
 
-	if (!canAttack)
+	if (!finishedTurn)
 	{
-		for (auto& otherEntity: getSystemEntities())
+		for (auto& otherEntity : getSystemEntities())
 		{
 			if (otherEntity == entity)
 			{
 				continue;
 			}
 
-			if (areInRange( entity,  otherEntity, entity.getComponent<RangeAttackComponent>().range))
+			if (areInRange(entity, otherEntity, entity.getComponent<RangeAttackComponent>().range))
 			{
-				canAttack = true;
-			
+				finishedTurn = true;
+
 				auto& health = otherEntity.getComponent<HealthComponent>();
 				health.healthPoints -= entity.getComponent<AgilityComponent>().agility;
 
-	
 				uint32_t attackerUnitId = entity.getComponent<UnitComponent>().gameId;
 				uint32_t targetUnitId = otherEntity.getComponent<UnitComponent>().gameId;
 				uint32_t damage = entity.getComponent<AgilityComponent>().agility;
 				uint32_t targetHp = health.healthPoints;
-			
-				eventLog.log(Simulation::getTurnNumber(), sw::io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetHp});
+
+				eventLog.log(
+					Simulation::getTurnNumber(), sw::io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetHp});
 
 				if (targetHp <= 0)
 				{
@@ -167,37 +169,48 @@ void AISystem::rangeBehavior(Entity& entity, std::shared_ptr<Map> map)
 		}
 	}
 
-	if (!canAttack)
+	if (!finishedTurn)
 	{
 		if (entity.hasComponent<MovementTargetComponent>())
 		{
-			auto& position = entity.getComponent<PositionComponent>();
-			const auto target = entity.getComponent<MovementTargetComponent>();
-			unsigned int id = entity.getComponent<UnitComponent>().gameId;
-			int targetDirectionX = target.x - position.x;
-			int targetDirectionY = target.y - position.y;
-
-			normalize(targetDirectionX, targetDirectionY);
-			if (targetDirectionX != 0 || targetDirectionY != 0)
-			{
-				position.x += targetDirectionX;
-				position.y += targetDirectionY;
-
-				unsigned int posX = position.x;
-				unsigned int posY = position.y;
-				eventLog.log(Simulation::getTurnNumber(), sw::io::UnitMoved{id, posX, posY});
-			}
+			moveBehavior(entity, map);
 		}
 	}
 }
 
-bool AISystem::areInRange( Entity& entity,  Entity& other, int range) {
-
+// range
+bool AISystem::areInRange(Entity& entity, Entity& other, int range)
+{
 	auto [x, y] = entity.getComponent<PositionComponent>();
 	auto [otherX, otherY] = other.getComponent<PositionComponent>();
-	
-	int dx = x - otherX;
-	int dy = y - otherY;
-	int distanceSquared = dx * dx + dy * dy;
-	return distanceSquared <= range * range; 
+
+	int dx = std::abs(x - otherX);
+	int dy = std::abs(y - otherY);
+
+	// Each diagonal or straight move counts as 1
+	int distance = std::max(dx, dy);
+	return distance <= range + 1;
+}
+
+void AISystem::moveBehavior(Entity& entity, std::shared_ptr<Map> map)
+{
+	auto& position = entity.getComponent<PositionComponent>();
+	const auto target = entity.getComponent<MovementTargetComponent>();
+	unsigned int id = entity.getComponent<UnitComponent>().gameId;
+	int targetDirectionX = target.x - position.x;
+	int targetDirectionY = target.y - position.y;
+
+	normalize(targetDirectionX, targetDirectionY);
+	if (targetDirectionX != 0 || targetDirectionY != 0)
+	{
+		if (map->checkBounds(position.x + targetDirectionX, position.y + targetDirectionY))
+		{
+			position.x += targetDirectionX;
+			position.y += targetDirectionY;
+		}
+
+		unsigned int posX = position.x;
+		unsigned int posY = position.y;
+		eventLog.log(Simulation::getTurnNumber(), sw::io::UnitMoved{id, posX, posY});
+	}
 }
