@@ -1,6 +1,6 @@
 [![CMake on multiple platforms](https://github.com/olesgedz/sw_battle/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/olesgedz/sw_battle/actions/workflows/cmake-multi-platform.yml)
 
-# Build instruction 
+# Build instructions 
 mkdir build
 cd build
 cmake ..
